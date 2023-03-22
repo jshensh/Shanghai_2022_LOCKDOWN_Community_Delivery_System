@@ -1,0 +1,52 @@
+{extend name="layout" /}
+
+{block name="title"}系统设置{/block}
+
+{block name="content"}
+                <div>
+                    <form class="form-horizontal" method="post" onsubmit="submitForm(this); return false;" action="">
+                        <div class="form-group">
+                            <label for="sys_user_register_group" class="col-sm-2 control-label">新用户默认用户组</label>
+                            <div class="col-sm-10" style="height: 34px; line-height: 34px;">
+                                <select id="sys_user_register_group" name="sys_user_register_group" style="width: 100%;" class="form-control">
+                                    <option value="{$config['sys_user_register_group']}" selected="selected">{$userGroup[$config['sys_user_register_group']]}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sms_secret" class="col-sm-2 control-label">SMS Secret</label>
+                            <div class="col-sm-10" style="height: 34px; line-height: 34px;">
+                                <input type="text" name="sms_secret" id="sms_secret" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sms_key" class="col-sm-2 control-label">SMS Key</label>
+                            <div class="col-sm-10" style="height: 34px; line-height: 34px;">
+                                <input type="text" name="sms_key" id="sms_key" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sms_key" class="col-sm-2 control-label">SMS AppID</label>
+                            <div class="col-sm-10" style="height: 34px; line-height: 34px;">
+                                <input type="text" name="sms_appid" id="sms_appid" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sms_key" class="col-sm-2 control-label">SMS SignName</label>
+                            <div class="col-sm-10" style="height: 34px; line-height: 34px;">
+                                <input type="text" name="sms_signname" id="sms_signname" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">提交</button>
+                        </div>
+                    </form>
+                </div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script src="__STATIC__/js/admin/config.js"></script>
+{/block}

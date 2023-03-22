@@ -1,0 +1,196 @@
+{extend name="layout" /}
+
+{block name="title"}发货任务管理{/block}
+
+{block name="content"}
+{if (isAllowed('dashboard_delivery', 2))}                <p>
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#createDeliveryModal">创建发货任务</button>
+                </p>
+{/if}
+
+                <div class="alert alert-info" role="alert">共有 <span id="srvCount">0</span> 条记录</div>
+
+                <div id="deliveryDetail">
+                </div>
+
+                <div class="pagerContainer">
+                    <div></div>
+                    <div class="jsgrid-pager">每页显示&nbsp;<select id="pageSize"><option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="999999999">全部</option></select>&nbsp;行</div>
+                </div>
+
+                <div class="modal fade" id="editDeliveryModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="editDeliveryForm" method="post" onsubmit="editDelivery(this); return false;" action="" class="form-horizontal">
+                        <input type="hidden" name="id" value="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title">编辑配送员</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="editDeliveryUser" class="col-xs-3 col-sm-2 control-label text-right">配送</label>
+                                        <div class="col-xs-9 col-sm-10">
+                                            <select class="form-control" name="deliveryUser[]" id="editDeliveryUser" style="width: 100%;" multiple="multiple"></select>
+                                            <p class="help-block" style="margin-bottom: -10px;">团长自行发货不用选择配送员</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal fade" id="createDeliveryModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="createDeliveryForm" method="post" onsubmit="submitForm(this); return false;" action="" class="form-horizontal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title">创建发货任务</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="deliveryAccordion">
+                                        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab" id="headingOne">
+                                                    <h4 class="panel-title">
+                                                        第一步：选择团购活动
+                                                    </h4>
+                                                </div>
+                                                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                                    <div class="panel-body">
+                                                        <div class="form-group">
+                                                            <label for="groupBuy" class="col-xs-3 col-sm-2 control-label text-right">团购</label>
+                                                            <div class="col-xs-9 col-sm-10">
+                                                                <select class="form-control" name="groupBuy[]" id="groupBuy" style="width: 100%;" multiple="multiple"></select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="text-right">
+                                                            <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">下一步</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab" id="headingTwo">
+                                                    <h4 class="panel-title">
+                                                        第二步：选择商品
+                                                    </h4>
+                                                </div>
+                                                <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                                                    <div class="panel-body">
+                                                        <div class="form-group">
+                                                            <label for="product" class="col-xs-3 col-sm-2 control-label text-right">商品</label>
+                                                            <div class="col-xs-9 col-sm-10">
+                                                                <select class="form-control" id="product" style="width: 100%;" multiple="multiple"></select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="text-right">
+                                                            <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">上一步</a>&nbsp;&nbsp;
+                                                            <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">下一步</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab" id="headingThree">
+                                                    <h4 class="panel-title">
+                                                        第三步：设置数量
+                                                    </h4>
+                                                </div>
+                                                <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                                                    <div class="panel-body">
+                                                        <div id="quantityContainer"></div>
+                                                        <div class="text-right">
+                                                            <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">上一步</a>&nbsp;&nbsp;
+                                                            <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour">下一步</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab" id="headingFour">
+                                                    <h4 class="panel-title">
+                                                        第四步：分配配送员
+                                                    </h4>
+                                                </div>
+                                                <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                                                    <div class="panel-body">
+                                                        <div class="form-group">
+                                                            <label for="deliveryUser" class="col-xs-3 col-sm-2 control-label text-right">配送</label>
+                                                            <div class="col-xs-9 col-sm-10">
+                                                                <select class="form-control" name="deliveryUser[]" id="deliveryUser" style="width: 100%;" multiple="multiple"></select>
+                                                                <p class="help-block" style="margin-bottom: -10px;">团长自行发货不用选择配送员</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">上一步</a>&nbsp;&nbsp;
+                                                            <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseFive" aria-expanded="true" aria-controls="collapseFive">下一步</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading" role="tab" id="headingFive">
+                                                    <h4 class="panel-title">
+                                                        第五步：设置收件人通知
+                                                    </h4>
+                                                </div>
+                                                <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                                                    <div class="panel-body">
+                                                        <div class="form-group">
+                                                            <div class="col-xs-12">
+                                                                <p>创建发货任务后，<strong style="color: red;">立即</strong>向所有收件人群发到货通知短信，告知将于以下时间开始配送（预估卸货时间）：</p>
+                                                            </div>
+                                                            <div class="col-xs-12">
+                                                                <select class="form-control" name="deliveryTime" id="deliveryTime" style="width: 100%;">
+                                                                    <option value="" selected="selected">不发送到货通知（自提）</option>
+                                                                    <option value="10">十分钟后</option>
+                                                                    <option value="15">十五分钟后</option>
+                                                                    <option value="20">二十分钟后</option>
+                                                                    <option value="30">三十分钟后</option>
+                                                                    <option value="60">一小时后</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour">上一步</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="deliveryConfirm" style="display: none;">
+                                        <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                            您正在创建发货任务，由于创建后<strong>不可撤销</strong>，请您再次核对以下所有信息无误后，点击“创建”按钮提交创建请求。
+                                        </div>
+                                        <div id="deliveryConfirmContent"></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">创建</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script>
+        var permission = {:json_encode(getPermission())};
+    </script>
+    <script src="__STATIC__/js/admin/delivery.js"></script>
+{/block}

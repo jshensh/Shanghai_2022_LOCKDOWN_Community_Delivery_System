@@ -1,0 +1,61 @@
+#permissionTreeView {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+
+#permissionTreeView .permissionRow {
+    color: #000000;
+    display: inline;
+}
+
+#permissionTreeView .checkbox-inline {
+    padding-top: 0;
+}
+
+#permissionTreeView .level {
+    display: inline-block;
+}
+
+#permissionTreeView .labelDiv {
+    display: inline;
+}
+
+#permissionTreeView .valDiv {
+    display: inline;
+}
+
+.treeview .list-group-item {
+    cursor: pointer
+}
+
+.treeview span.icon {
+    width: 12px;
+    margin-right: 5px
+}
+
+.node-permissionTreeView {
+    color: #428bca;
+    border: none;
+}
+
+.node-permissionTreeView:hover {
+    background-color: #F5F5F5;
+}
+
+@media only screen and (max-width : 768px) {
+    .valDiv {
+        display: inline-grid !important;
+        vertical-align: text-top;
+    }
+    .valDiv .checkbox-inline:nth-of-type(1) {
+        padding-left: 30px !important;
+    }
+    #permissionTreeView .control-label {
+        max-width: 100px;
+        vertical-align: text-top;
+    }
+
+}

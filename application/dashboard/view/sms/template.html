@@ -1,0 +1,74 @@
+{extend name="layout" /}
+
+{block name="title"}短信模板管理{/block}
+
+{block name="content"}
+{if (isAllowed('dashboard_sms_template', 2))}                <p>
+                    <button type="button" class="btn btn-default" onclick="createNewSmsTemplate();">新建模板</button>
+                </p>
+{/if}
+
+                <div class="alert alert-info" role="alert">共有 <span id="srvCount">0</span> 条记录</div>
+
+                <div id="smsTemplateDetail">
+                </div>
+
+                <div class="pagerContainer">
+                    <div></div>
+                    <div class="jsgrid-pager">每页显示&nbsp;<select id="pageSize"><option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="999999999">全部</option></select>&nbsp;行</div>
+                </div>
+
+                <div class="modal fade" id="editSmsTemplateModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="editSmsTemplateForm" method="post" onsubmit="submitForm(this); return false;" action="" class="form-horizontal">
+                        <input type="hidden" name="id" value="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title"><span id="editPanelTitle">编辑</span>模板</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="serial" class="col-sm-2 control-label">编号</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="serial" placeholder="腾讯云模板编号" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="name" class="col-sm-2 control-label">名称</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="name" placeholder="名称" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="content" class="col-sm-2 control-label">内容</label>
+                                        <div class="col-sm-10">
+                                            <textarea class="form-control" name="content" rows="5"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="params" class="col-sm-2 control-label">参数列表 json</label>
+                                        <div class="col-sm-10">
+                                            <textarea class="form-control" name="params" rows="5"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script>
+        var permission = {:json_encode(getPermission())};
+    </script>
+    <script src="__STATIC__/js/admin/smsTemplate.js"></script>
+{/block}

@@ -1,0 +1,94 @@
+{extend name="layout" /}
+
+{block name="title"}用户管理{/block}
+
+{block name="content"}
+{if (isAllowed('dashboard_user', 2))}                <p>
+                    <button type="button" class="btn btn-default" onclick="createNewUser();">新建用户</button>
+                </p>
+{/if}
+
+                <div class="alert alert-info" role="alert">共有 <span id="srvCount">0</span> 条记录</div>
+
+                <div id="userDetail">
+                </div>
+
+                <div class="pagerContainer">
+                    <div></div>
+                    <div class="jsgrid-pager">每页显示&nbsp;<select id="pageSize"><option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="999999999">全部</option></select>&nbsp;行</div>
+                </div>
+
+                <div class="modal fade" id="editUserModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="editUserForm" method="post" onsubmit="submitForm(this); return false;" action="" class="form-horizontal">
+                        <input type="hidden" name="id" value="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title"><span id="editPanelTitle">编辑</span>用户</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="name" class="col-sm-2 control-label">用户名</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="name" placeholder="用户名" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pwd" class="col-sm-2 control-label">新密码</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="pwd" placeholder="" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="group_id" class="col-sm-2 control-label">用户组</label>
+                                        <div class="col-sm-10" style="height: 34px; line-height: 34px;">
+                                            <select name="group_id" style="width: 100%;" class="form-control"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal fade" id="addSmsAmountModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="addSmsAmountForm" method="post" onsubmit="addSmsAmount(this); return false;" action="" class="form-horizontal">
+                        <input type="hidden" name="id" value="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title">增加用户短信额度</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="quantity" class="col-sm-2 control-label">条数</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" name="quantity" placeholder="需要增加的条数" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">提交</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script>
+        var permission = {:json_encode(getPermission())};
+    </script>
+    <script src="__STATIC__/js/admin/user.js"></script>
+{/block}

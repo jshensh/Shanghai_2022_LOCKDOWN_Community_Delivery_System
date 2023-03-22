@@ -1,0 +1,20 @@
+{extend name="layout" /}
+
+{block name="title"}暂无权限访问{/block}
+
+{block name="content"}
+                <div class="alert alert-danger" role="alert">很抱歉您暂无使用该功能的权限，将于 3 秒后返回上一页</div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script>
+        $(function() {
+            window.backId = setTimeout(function() {
+                history.go(-1);
+            }, 3000);
+        });
+    </script>
+{/block}

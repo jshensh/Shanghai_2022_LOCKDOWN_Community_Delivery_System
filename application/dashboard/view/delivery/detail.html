@@ -1,0 +1,146 @@
+{extend name="layout" /}
+
+{block name="title"}发货{/block}
+
+{block name="content"}
+                <div class="panel-group" id="summaryTableAccordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingSummaryTable">
+                            <h4 class="panel-title">
+                                <a role="button" data-toggle="collapse" data-parent="#summaryTableAccordion" href="#collapseSummaryTable" aria-expanded="true" aria-controls="collapseSummaryTable" style="text-decoration: none;">
+                                    楼栋汇总表（点击此处<span id="headingSummaryTableHelp">隐藏</span>）
+                                </a>
+                          </h4>
+                        </div>
+                        <div id="collapseSummaryTable" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingSummaryTable">
+                            <div class="panel-body">
+                                <form class="form-horizontal" onsubmit="submitCalcSummaryTable(); return false;" id="calcSummaryTableForm">
+                                    <div class="form-group">
+                                        <div class="col-xs-12">
+                                            <select class="form-control" name="calcSummaryTable[]" id="calcSummaryTable" style="width: 100%;" multiple="multiple"></select>
+                                        </div>
+                                    </div>
+                                    <p class="text-center">
+                                        <button type="submit" class="btn btn-primary">计算</button>&nbsp;&nbsp;
+                                        <button type="button" class="btn btn-default" onclick="clearInput('#calcSummaryTable'); submitCalcSummaryTable();">清空</button>
+                                    </p>
+                                </form>
+                                <div id="summaryTable" style="max-height: 309px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="writeOffModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="writeOffForm" method="post" onsubmit="submitForm(this); return false;" action="" class="form-horizontal">
+                        <input type="hidden" name="deliveryId" value="">
+                        <input type="hidden" name="building" value="">
+                        <input type="hidden" name="room" value="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title">核销</h4>
+                                </div>
+                                <div class="modal-body"></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                    <button type="submit" class="btn btn-primary">核销</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal fade" id="claimBuildingModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="claimBuildingForm" method="post" onsubmit="submitClaimBuilding(this); return false;" action="" class="form-horizontal">
+                        <input type="hidden" name="deliveryId" value="">
+                        <input type="hidden" name="building" value="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title">认领<span id="claimBuildingText"></span></h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <div class="col-xs-12">
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="isPickup" value="0">发送配送通知，告知客户五分钟后送达
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="isPickup" value="1" checked>发送自提通知，告知客户立即前往该地点自提
+                                                </label>
+                                            </div>
+                                            <div style="padding: 5px 20px;">
+                                                <select name="pickup" style="width: 100%;">
+                                                    <option value="34">34 号楼自提点</option>
+                                                    <option value="14">14 号楼自提点</option>
+                                                    <option value="36">36 号楼自提点</option>
+                                                    <option value="32">32 号楼自提点</option>
+                                                    <option value="38" selected="selected">38 号楼自提点</option>
+                                                    <option value="2">2 号楼自提点（公益团 1 号点位）</option>
+                                                    <option value="6">6 号楼自提点（公益团 2 号点位）</option>
+                                                    <option value="19">19 号楼自提点（公益团 3 号点位）</option>
+                                                    <option value="33">33 号楼自提点（公益团 4 号点位）</option>
+                                                    <!-- <option value="35">35 号楼自提点（公益团 5 号点位）</option>
+                                                    <option value="37">37 号楼自提点（公益团 6 号点位）</option>
+                                                    <option value="54">54 号楼自提点（公益团 7 号点位）</option> -->
+                                                    <option value="61">61 号楼自提点（公益团 8 号点位）</option>
+                                                    <!-- <option value="67">67 号楼自提点（公益团 9 号点位）</option> -->
+                                                    <option value="99">桂巷路大门自提点</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                    <button type="submit" class="btn btn-primary">确定</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <form class="form-horizontal" onsubmit="return false;">
+                    <div class="form-group">
+                        <div class="col-xs-12">
+                            <select class="form-control" name="building" id="building" style="width: 100%;"></select>
+                        </div>
+                        <div class="col-xs-12">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" id="all" value="true" /> 显示所有订单（包括已核销订单）
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <button type="button" class="btn btn-primary btn-lg" id="claimBuilding" style="display: none; margin-bottom: 15px;" data-toggle="modal" data-target="#claimBuildingModal"></button>
+
+                <div id="deliveryOrderDetail"></div>
+{/block}
+
+{block name="css"}
+    <style type="text/css">
+        #deliveryOrderDetail li {
+            line-height: 20px;
+        }
+        
+        .no-search .select2-search {
+            display: none
+        }
+    </style>
+{/block}
+
+{block name="javascript"}
+    <script>
+        var permission = {:json_encode(getPermission())}, deliveryId = {$deliveryId};
+    </script>
+    <script src="__STATIC__/js/admin/deliveryDetail.js"></script>
+{/block}

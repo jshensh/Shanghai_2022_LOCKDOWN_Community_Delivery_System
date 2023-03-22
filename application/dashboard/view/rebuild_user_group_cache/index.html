@@ -1,0 +1,20 @@
+{extend name="layout" /}
+
+{block name="title"}重建成功{/block}
+
+{block name="content"}
+                <div class="alert alert-success" role="alert">重建成功，将于 1 秒后返回上一页</div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script>
+        $(function() {
+            window.backId = setTimeout(function() {
+                history.go(-1);
+            }, 1000);
+        });
+    </script>
+{/block}

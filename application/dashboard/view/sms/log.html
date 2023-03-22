@@ -1,0 +1,70 @@
+{extend name="layout" /}
+
+{block name="title"}短信发送日志{/block}
+
+{block name="content"}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">筛选</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form role="form" class="form-horizontal" onsubmit="searchWithForm('#smsLogDetail', this); return false;">
+                            <div class="form-group">
+                                <label for="group_buy_id" class="col-xs-3 col-sm-1 control-label text-right">团购</label>
+                                <div class="col-xs-9 col-sm-11">
+                                    <select class="form-control" name="group_buy_id[]" id="group_buy_id" style="width: 100%;" multiple="multiple"></select>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <div class="col-xs-12 col-sm-6" style="margin-bottom: 15px;">
+                                    <div class="row">
+                                        <label for="phone" class="col-xs-3 col-sm-2 control-label text-right">手机号</label>
+                                        <div class="col-xs-9 col-sm-10">
+                                            <input type="number" class="form-control" name="phone" id="phone" placeholder="手机号" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6" style="margin-bottom: 15px;">
+                                    <div class="row">
+                                        <label for="send_status" class="col-xs-3 col-sm-2 control-label text-right">状态</label>
+                                        <div class="col-xs-9 col-sm-10">
+                                            <select class="form-control" name="send_status" id="send_status" style="width: 100%;">
+                                                <option value="">全部</option>
+                                                <option value="1">成功</option>
+                                                <option value="0">失败</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 text-center">
+                                    <button type="button" class="btn btn-default" onclick="clearInput('#group_buy_id', '#phone', '#send_status');">清空</button>
+                                    &nbsp;&nbsp;&nbsp;
+                                    <button type="submit" class="btn btn-primary" id="orderSearchButton">搜索</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" role="alert">共有 <span id="srvCount">0</span> 条记录</div>
+
+                <div id="smsLogDetail">
+                </div>
+
+                <div class="pagerContainer">
+                    <div></div>
+                    <div class="jsgrid-pager">每页显示&nbsp;<select id="pageSize"><option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="999999999">全部</option></select>&nbsp;行</div>
+                </div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script>
+        var permission = {:json_encode(getPermission())};
+    </script>
+    <script src="__STATIC__/js/admin/smsLog.js"></script>
+{/block}

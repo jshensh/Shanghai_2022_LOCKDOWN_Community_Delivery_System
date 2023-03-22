@@ -1,0 +1,171 @@
+{extend name="layout" /}
+
+{block name="title"}登录{/block}
+
+{block name="content"}
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+                    <div class="hidden-xs" style="height: 100px;"></div>
+                    <div style="padding-top: 50px;">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <h3 style="margin: 15px 0 0 0;" id="panelTitle">登录</h3>
+                                <hr style="margin: 10px 0 15px 0;" />
+                                <form class="form-horizontal" onsubmit="submitForm($(this).attr('action')); return false;" action="{:url('/api/v1/user/login', '', '')}" id="lorForm">
+                                    <div class="form-group">
+                                        <label for="name" class="col-sm-3 control-label text-right">用户名</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="name" placeholder="用户名" name="name" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pwd" class="col-sm-3 control-label">密码</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control" id="pwd" placeholder="密码" name="pwd" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display: none;" id="pwd2FG">
+                                        <label for="pwd2" class="col-sm-3 control-label">重复密码</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control" id="pwd2" placeholder="重复密码" name="pwd2" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="code" class="col-sm-3 control-label">验证码</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="code" placeholder="验证码（不分大小写）" name="code" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="text-center">
+                                            <button type="submit" class="btn btn-primary" id="submitButton">登录</button>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p><a href="javascript: void(0);" onclick="toggleLoginRegister(this);" class="nodecoration">没有账号，现在注册</a></p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default" style="display: none;" id="captcha_div">
+            <div class="panel-body">
+                <img src="{:url('/captcha', '', '')}" style="cursor: pointer;" id="captcha_img" />
+            </div>
+        </div>
+{/block}
+
+{block name="css"}
+    <style>
+        body {
+            background-color: #EEEEEE;
+        }
+
+        a.nodecoration {
+            text-decoration: none;
+        }
+    </style>
+{/block}
+
+{block name="javascript"}
+    <script>
+        $(function() {
+            $('#code').on('focus', function() {
+                $('#captcha_div').css({
+                    "position": "absolute",
+                    "z-index": 9999,
+                    "top": $('#code').offset().top - 92,
+                    "left": $('#code').offset().left,
+                    "width": 280,
+                    "height": 92,
+                    "background-color": "#fff",
+                    "display": "block"
+                });
+            })
+
+            $('body').on('click', function(event) {
+                var obj = event.srcElement ? event.srcElement : event.target;
+                if ($(obj).attr('id') === 'captcha_img') {
+                    $(obj).attr('src', '{:url('/captcha', '', '')}?_t=' + new Date().getTime());
+                } else if ($(obj).attr('id') !== 'code') {
+                    $('#captcha_div').hide();
+                }
+                return true;
+            });
+
+            $(window).resize(function() {
+                $('#captcha_div').css({
+                    "position": "absolute",
+                    "z-index": 9999,
+                    "top": $('#code').offset().top - 92,
+                    "left": $('#code').offset().left,
+                    "width": 280,
+                    "height": 92,
+                    "background-color": "#fff"
+                });
+            });
+        });
+
+        var submitForm = function() {
+            var doms = {'#name': '用户名', '#pwd': '密码', '#pwd2': '重复密码', '#code': '验证码'};
+            for (var i in doms) {
+                if (i === '#pwd2' && $('#lorForm').attr('action') !== '{:url('/api/v1/user/register', '', '')}') {
+                    continue;
+                }
+                if (!$(i).val()) {
+                    toastr.error(doms[i] + '不能为空', '数据不合法');
+                    $(i).focus();
+                    return false;
+                }
+                if (i === '#pwd2') {
+                    if ($(i).val() !== $('#pwd').val()) {
+                        toastr.error('两次密码输入不一致', '数据不合法');
+                        $(i).val('').focus();
+                        return false;
+                    }
+                }
+            }
+
+            $('#submitButton').attr('disabled', 'disabled');
+            $.ajax({
+                type: "POST",
+                url: $('#lorForm').attr('action'),
+                data: {
+                    "name": $('#name').val(),
+                    "pwd": $('#pwd').val(),
+                    "code": $('#code').val()
+                }
+            }).then(function(data, status) {
+                location.href = "{:url('dashboard/index/index', '', '')}";
+            }).fail(function(data) {
+                $('#submitButton').removeAttr('disabled');
+                $('#captcha_img').attr('src', '{:url('/captcha', '', '')}?_t=' + new Date().getTime());
+                $('#code').val('').focus();
+                toastr.error(typeof data["responseJSON"] === 'undefined' || !data["responseJSON"] ? '未知错误' : (data["responseJSON"]["error"] || '未知错误'), "提交失败");
+            });
+        };
+
+        var toggleLoginRegister = function(dom) {
+            var aDom = $(dom),
+                status = aDom.text() === '没有账号，现在注册' ? 'login' : 'register';
+
+            if (status === 'login') {
+                $('#panelTitle').text('注册');
+                $('#submitButton').text('注册');
+                aDom.text('已有账号，立即登录');
+                $('#lorForm').attr('action', '{:url('/api/v1/user/register', '', '')}');
+                $('#pwd2FG').slideDown();
+            } else {
+                $('#panelTitle').text('登录');
+                $('#submitButton').text('登录');
+                aDom.text('没有账号，现在注册');
+                $('#lorForm').attr('action', '{:url('/api/v1/user/login', '', '')}');
+                $('#pwd2FG').slideUp();
+            }
+        }
+    </script>
+{/block}

@@ -1,0 +1,27 @@
+                            <li><a data-pjax href="{:url('dashboard/Index/index', '', '')}">首页</a></li>
+{if (isAllowed('dashboard_group_buy'))}                            <li><a data-pjax href="{:url('dashboard/GroupBuy/index', '', '')}">团购管理</a></li>
+{/if}
+{if (isAllowed('dashboard_order'))}                            <li><a data-pjax href="{:url('dashboard/Order/index', '', '')}">订单管理</a></li>
+{/if}
+{if (isAllowed('dashboard_delivery'))}                            <li><a data-pjax href="{:url('dashboard/Delivery/index', '', '')}">发货任务管理</a></li>
+{/if}
+{if (isAllowed('dashboard_sms'))}                            <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">短信管理 <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+{if (isAllowed('dashboard_sms_template'))}                                    <li><a data-pjax href="{:url('dashboard/Sms/template', '', '')}">模板管理</a></li>
+{/if}
+{if (isAllowed('dashboard_sms_test'))}                                    <li><a data-pjax href="{:url('dashboard/Sms/test', '', '')}">发送测试</a></li>
+{/if}
+{if (isAllowed('dashboard_sms_log'))}                                    <li><a data-pjax href="{:url('dashboard/Sms/log', '', '')}">发送日志</a></li>
+{/if}
+                                </ul>
+                            </li>
+{/if}
+{if (isAllowed('dashboard_user'))}                            <li><a data-pjax href="{:url('dashboard/User/index', '', '')}">用户管理</a></li>
+{/if}
+{if (isAllowed('dashboard_user_group'))}                            <li><a data-pjax href="{:url('dashboard/UserGroup/index', '', '')}">用户组管理</a></li>
+{/if}
+{if (isAllowed('dashboard_config'))}                            <li><a data-pjax href="{:url('dashboard/Config/index', '', '')}">系统设置</a></li>
+{/if}
+                            <!-- <li><a data-pjax href="{:url('dashboard/RebuildUserGroupCache/index', '', '')}">Debug</a></li> -->
+                            <li><a href="{:url('dashboard/User/logout', '', '')}">退出登录</a></li>

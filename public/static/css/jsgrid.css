@@ -1,0 +1,22 @@
+.jsgrid-grid-body {
+    scrollbar-arrow-color: #f1f1f1;
+    scrollbar-base-color: #f1f1f1;
+    scrollbar-3dlight-color: #f1f1f1;
+    scrollbar-highlight-color: #f1f1f1;
+    scrollbar-face-color: #ddd;
+    scrollbar-shadow-color: #f1f1f1;
+    scrollbar-track-color: #f1f1f1;
+    scrollbar-dark-shadow-color: #f1f1f1;
+}
+
+.jsgrid-grid-body::-webkit-scrollbar {
+    visibility: hidden;
+}
+
+.jsgrid-grid-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.jsgrid-grid-body::-webkit-scrollbar-thumb {
+    background: #ddd;
+}

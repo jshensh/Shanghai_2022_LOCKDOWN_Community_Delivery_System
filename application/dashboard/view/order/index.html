@@ -1,0 +1,203 @@
+{extend name="layout" /}
+
+{block name="title"}订单管理{/block}
+
+{block name="content"}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">筛选</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form role="form" class="form-horizontal" onsubmit="searchWithForm('#orderDetail', this); return false;">
+                            <div class="form-group">
+                                <label for="group_buy_id" class="col-xs-3 col-sm-1 control-label text-right">团购</label>
+                                <div class="col-xs-9 col-sm-11">
+                                    <select class="form-control" name="group_buy_id" id="group_buy_id" style="width: 100%;"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="product" class="col-xs-3 col-sm-1 control-label text-right">商品</label>
+                                <div class="col-xs-9 col-sm-11">
+                                    <select class="form-control" name="product[]" id="product" style="width: 100%;" multiple="multiple"></select>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
+                                    <div class="row">
+                                        <label for="serial" class="col-xs-3 col-sm-3 control-label text-right">单号</label>
+                                        <div class="col-xs-9 col-sm-9">
+                                            <input type="number" class="form-control" name="serial" id="serial" placeholder="单号" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
+                                    <div class="row">
+                                        <label for="phone" class="col-xs-3 col-sm-3 control-label text-right">手机号</label>
+                                        <div class="col-xs-9 col-sm-9">
+                                            <input type="number" class="form-control" name="phone" id="phone" placeholder="手机号" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
+                                    <div class="row">
+                                        <label for="building" class="col-xs-3 col-sm-3 control-label text-right">楼号</label>
+                                        <div class="col-xs-9 col-sm-9">
+                                            <input type="text" class="form-control" name="building" id="building" placeholder="楼号" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
+                                    <div class="row">
+                                        <label for="status" class="col-xs-3 col-sm-3 control-label text-right">状态</label>
+                                        <div class="col-xs-9 col-sm-9">
+                                            <select class="form-control" name="status" id="status">
+                                                <option value="">全部</option>
+                                                <option value="0">其他</option>
+                                                <option value="1_1">待发货</option>
+                                                <option value="1_2">已发货</option>
+                                                <option value="2">已核销</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 text-center">
+                                    <button type="button" class="btn btn-default" onclick="clearInput('#group_buy_id', '#product', '#serial', '#phone', '#building', '#status');">清空</button>
+                                    &nbsp;&nbsp;&nbsp;
+                                    <button type="submit" class="btn btn-primary" id="orderSearchButton">搜索</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <p style="margin-bottom: 20px;">
+{if (isAllowed('dashboard_order', 2))}
+                    <button type="button" class="btn btn-default" onclick="createNewOrder();" style="margin: 2.5px 0">录入订单</button>&nbsp;&nbsp;
+{/if}
+{if (isAllowed('dashboard_order', 10))}
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#importOrderModal" style="margin: 2.5px 0">导入订单</button>&nbsp;&nbsp;
+{/if}
+                    <button type="button" class="btn btn-default" onclick="exportOrder();" style="margin: 2.5px 0">导出发货单</button>&nbsp;&nbsp;
+                    <button type="button" class="btn btn-default" onclick="exportOrder(true);" style="margin: 2.5px 0">导出发货单（不合并单元格）</button>
+                </p>
+
+                <div class="alert alert-info" role="alert">共有 <span id="srvCount">0</span> 条记录</div>
+
+                <div id="orderDetail">
+                </div>
+
+                <div class="pagerContainer">
+                    <div></div>
+                    <div class="jsgrid-pager">每页显示&nbsp;<select id="pageSize"><option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="999999999">全部</option></select>&nbsp;行</div>
+                </div>
+
+                <div class="modal fade" id="editOrderModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="editOrderForm" method="post" onsubmit="submitForm(this); return false;" action="" class="form-horizontal" autocomplete="off">
+                        <input type="hidden" name="id" value="">
+                        <input type="hidden" name="group_buy_id" value="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title"><span id="editPanelTitle">编辑</span>订单</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="serial" class="col-sm-2 control-label">单号</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" name="serial" placeholder="单号" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="product" class="col-sm-2 control-label">商品</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="product" placeholder="商品" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="quantity" class="col-sm-2 control-label">数量</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" name="quantity" placeholder="数量" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="receiver" class="col-sm-2 control-label">收件人</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="receiver" placeholder="收件人" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone" class="col-sm-2 control-label">手机号</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" name="phone" placeholder="手机号" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="building" class="col-sm-2 control-label">楼号</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="building" placeholder="楼号" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="room" class="col-sm-2 control-label">房号</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="room" placeholder="房号" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="remark" class="col-sm-2 control-label">备注</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="remark" placeholder="备注" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal fade" id="importOrderModal" role="dialog" aria-labelledby="myModalLabel">
+                    <form id="importOrderForm" method="post" onsubmit="importOrder(this); return false;" action="" class="form-horizontal">
+                        <input type="hidden" name="groupBuyId" value="">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title">导入订单</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                        您正在对团购活动 <span id="groupBuyImportOrdersWarning"></span> 进行导入订单操作
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="excel" class="col-sm-2 control-label">Excel</label>
+                                        <div class="col-sm-10">
+                                            <input type="file" class="form-control" name="excel" single accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">导入</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script>
+        var permission = {:json_encode(getPermission())};
+    </script>
+    <script src="__STATIC__/js/admin/order.js"></script>
+{/block}
