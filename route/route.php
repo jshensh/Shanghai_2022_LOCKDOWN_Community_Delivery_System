@@ -20,6 +20,7 @@ Route::group('api/:version', function() {
     Route::put('admin/User/:id/:action', 'api/:version.admin.User/:action?id=:id')->pattern(['id' => '\d+']);
     Route::get('admin/Delivery/:id/:action', 'api/:version.admin.Delivery/:action?id=:id')->pattern(['id' => '\d+']);
     Route::post('admin/Delivery/:id/:action', 'api/:version.admin.Delivery/:action?id=:id')->pattern(['id' => '\d+']);
+    Route::get('admin/SmsTemplate/:id/:action', 'api/:version.admin.SmsTemplate/:action?id=:id')->pattern(['id' => '\d+']);
 
     Route::get('admin/:controller/:action', 'api/:version.admin.:controller/:action');
     Route::post('admin/:controller/:action', 'api/:version.admin.:controller/:action');

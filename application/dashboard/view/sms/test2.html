@@ -1,0 +1,100 @@
+{extend name="layout" /}
+
+{block name="title"}点对点群发测试{/block}
+
+{block name="content"}
+                    <div class="col-md-4 col-lg-3" id="leftPanel">
+                        <form id="smsForm" onsubmit="submitForm(this, '/api/v1/admin/Sms/send2'); return false;" class="form-horizontal">
+                            <div id="deliveryAccordion">
+                                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" role="tab" id="headingOne">
+                                            <h4 class="panel-title">
+                                                第一步：选择模板
+                                            </h4>
+                                        </div>
+                                        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                            <div class="panel-body">
+                                                <div class="form-group">
+                                                    <label for="template" class="col-sm-2 control-label" style="padding-top: 4px; text-align: right;">模板</label>
+                                                    <div class="col-sm-10">
+                                                        <select class="form-control" name="template" id="template" style="width: 100%;"></select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="text-right">
+                                                    <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">下一步</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" role="tab" id="headingTwo">
+                                            <h4 class="panel-title">
+                                                第二步：填写表格
+                                            </h4>
+                                        </div>
+                                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                                            <div class="panel-body">
+                                                <div class="form-group text-center">
+                                                    <a role="button" class="btn btn-info" id="downloadTemplate" disabled="disabled" target="_blank">下载</a>
+                                                </div>
+
+                                                <div class="text-right">
+                                                    <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">上一步</a>&nbsp;&nbsp;
+                                                    <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">下一步</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" role="tab" id="headingThree">
+                                            <h4 class="panel-title">
+                                                第三步：上传表格
+                                            </h4>
+                                        </div>
+                                        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                                            <div class="panel-body">
+                                                <div class="form-group">
+                                                    <label for="file" class="col-sm-2 control-label" style="padding-top: 7px; text-align: right;">文件</label>
+                                                    <div class="col-sm-10">
+                                                        <input name="file" type="file" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="text-right">
+                                                    <a role="button" class="btn btn-default" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">上一步</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <button type="submit" class="btn btn-primary">发送</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-8 col-lg-9">
+                        <label>预览</label>
+                        <div style="border: 1px solid #ddd;">
+                            <textarea id="originContent" style="display: none;"></textarea>
+                            <textarea id="preview" style="width: 100%;" class="form-control" rows="5" readonly="readonly"></textarea>
+                        </div>
+                        <label style="margin-top: 5px;">接口返回值</label>
+                        <div style="border: 1px solid #ddd;">
+                            <textarea id="responseBody" style="width: 100%;" class="file-editor-textarea js-code-textarea"></textarea>
+                        </div>
+                    </div>
+{/block}
+
+{block name="css"}
+{/block}
+
+{block name="javascript"}
+    <script>
+        var permission = {:json_encode(getPermission())}, smsSignName = {:json_encode($smsSignName)};
+    </script>
+    <script src="__STATIC__/js/admin/smsTest2.js"></script>
+{/block}

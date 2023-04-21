@@ -8,6 +8,11 @@ use think\Validate;
 use think\facade\Session;
 use app\common\service\Paginator;
 
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use \PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
+use \PhpOffice\PhpSpreadsheet\Cell\DataType;
+
 class SmsTemplate extends DashboardApiBase
 {
     private $permissionScope = 'dashboard_sms_template';
@@ -120,5 +125,49 @@ class SmsTemplate extends DashboardApiBase
 
         $smsTemplate->delete();
         return json(['errno' => 0]);
+    }
+
+    public function download($id = 0)
+    {
+        if (!$this->isAllowed($this->permissionScope, 1)) {
+            return json(['status' => 'error', 'error' => '暂无操作权限'], 400);
+        }
+
+        $smsTemplate = SmsTemplateModel::get($id);
+        if (!$smsTemplate) {
+            return json(['status' => 'error', 'error' => '请求项不存在'], 400);
+        }
+
+        $now = date('YmdHis');
+        $title = "{$now} - {$smsTemplate->name}模板";
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet->getDefaultStyle()->getFont()->setName('宋体')->setSize(11);
+        $spreadsheet->getDefaultStyle()->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+        $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $worksheet = $spreadsheet->getActiveSheet();
+        $worksheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
+        $worksheet->getDefaultRowDimension()->setRowHeight(15);
+
+        $worksheet->setCellValueExplicitByColumnAndRow(1, 1, "手机号", DataType::TYPE_STRING);
+        $worksheet->getColumnDimension(Coordinate::stringFromColumnIndex(1))->setWidth(15);
+
+        $params = json_decode($smsTemplate->params, 1);
+        for ($i = 0; $i < count($params); $i++) {
+            $worksheet->setCellValueExplicitByColumnAndRow($i + 2, 1, $params[$i], DataType::TYPE_STRING);
+            $worksheet->getColumnDimension(Coordinate::stringFromColumnIndex($i + 2))->setWidth(mb_strlen($params[$i]) * 2 + 2);
+        }
+
+        ob_start();
+        $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
+        $writer->save('php://output');
+        $xlsData = ob_get_contents();
+        ob_end_clean();
+
+        return response()->data($xlsData)->header([
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$title}.xlsx\"",
+            'Cache-control'       => 'no-cache,must-revalidate'
+        ]);
     }
 }

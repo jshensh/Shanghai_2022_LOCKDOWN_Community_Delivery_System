@@ -10,7 +10,8 @@
                                 <ul class="dropdown-menu">
 {if (isAllowed('dashboard_sms_template'))}                                    <li><a data-pjax href="{:url('dashboard/Sms/template', '', '')}">模板管理</a></li>
 {/if}
-{if (isAllowed('dashboard_sms_test'))}                                    <li><a data-pjax href="{:url('dashboard/Sms/test', '', '')}">发送测试</a></li>
+{if (isAllowed('dashboard_sms_test'))}                                    <li><a data-pjax href="{:url('dashboard/Sms/test', '', '')}">单内容群发测试</a></li>
+                                    <li><a data-pjax href="{:url('dashboard/Sms/test2', '', '')}">点对点群发测试</a></li>
 {/if}
 {if (isAllowed('dashboard_sms_log'))}                                    <li><a data-pjax href="{:url('dashboard/Sms/log', '', '')}">发送日志</a></li>
 {/if}

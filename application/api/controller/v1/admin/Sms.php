@@ -10,6 +10,11 @@ use app\common\service\TencentSms;
 use app\common\service\Paginator;
 use app\api\model\v1\Config as ConfigModel;
 use app\api\model\v1\SmsLog as SmsLogModel;
+use app\api\model\v1\SmsTemplate as SmsTemplateModel;
+
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use \PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
 
 class Sms extends DashboardApiBase
 {
@@ -102,6 +107,132 @@ class Sms extends DashboardApiBase
         } catch(\Exception $e) {
             return json(['status' => 'error', 'error' => $e->getMessage(), 'trace' => $e->getTrace()], 400)
                 ->options(['json_encode_param' => JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE]);
+        }
+    }
+
+    private function parseTemplateFile($smsTemplate, $file)
+    {
+        $reader = IOFactory::createReader("Xlsx");
+        $reader->setReadDataOnly(true);
+        $reader->setLoadSheetsOnly(["Worksheet"]);
+        $spreadsheet = $reader->load($file);
+        $worksheet = $spreadsheet->getActiveSheet();
+        $highestRow = $worksheet->getHighestRow(); // e.g. 10
+        $highestColumnIndex = Coordinate::columnIndexFromString($worksheet->getHighestColumn()); // e.g. 5
+
+        if ($highestRow <= 1) {
+            throw new \Exception("数据错误，可能缺少“Worksheet”数据表");
+        }
+        
+        $smsTemplateParams = json_decode($smsTemplate->params, 1);
+        $column = array_flip($smsTemplateParams);
+        $columnIndex = array_combine(array_keys($column), array_pad([], count($column), 0));
+        $columnIndex['手机号'] = 0;
+
+        for ($col = 1; $col <= $highestColumnIndex; $col++) {
+            $tmpTHeadCell = $worksheet->getCellByColumnAndRow($col, 1)->getValue();
+            if (isset($columnIndex[$tmpTHeadCell])) {
+                $columnIndex[$tmpTHeadCell] = $col;
+            }
+        }
+
+        $missingKey = array_search(0, $columnIndex, true);
+        if ($missingKey) {
+            throw new \Exception("数据错误，缺少“{$missingKey}”字段");
+        }
+
+        $data = [];
+
+        for ($row = 2; $row <= $highestRow; $row++) {
+            $data[$row - 2] = [
+                'template' => $smsTemplate->id,
+                'params'   => [],
+                'phones'   => [$worksheet->getCellByColumnAndRow($columnIndex['手机号'], $row)->getValue()]
+            ];
+
+            foreach ($columnIndex as $key => $col) {
+                if ($key === '手机号') {
+                    continue;
+                }
+                $data[$row - 2]['params'][$column[$key]] = $worksheet->getCellByColumnAndRow($col, $row)->getValue();
+            }
+        }
+
+        return $data;
+    }
+
+    public function preview2(Request $request)
+    {
+        if (!$this->isAllowed('dashboard_sms_test', 1)) {
+            return json(['status' => 'error', 'error' => '暂无操作权限'], 400);
+        }
+
+        $validator = [
+            'template'  => ['require', 'number'],
+            'file'      => ['require', 'file']
+        ];
+
+        $validate = Validate::make($validator);
+        if (!$validate->check(array_merge($request->only(array_keys($validator)), $request->file() ?? []))) {
+            return json(['status' => 'error', 'error' => $validate->getError()], 422);
+        }
+        $params = array_merge($request->only(array_keys($validator)), $request->file());
+        
+        $smsTemplate = SmsTemplateModel::get($params['template']);
+        if (!$smsTemplate) {
+            return json(['status' => 'error', 'error' => '短信模板不存在'], 400);
+        }
+
+        try {
+            $data = $this->parseTemplateFile($smsTemplate, $params['file']->getPathname());
+            return json(['count' => count($data), 'firstRow' => $data[0]]);
+        } catch (\Exception $e) {
+            return json(['status' => 'error', 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function send2(Request $request)
+    {
+        if (!$this->isAllowed('dashboard_sms_test', 1)) {
+            return json(['status' => 'error', 'error' => '暂无操作权限'], 400);
+        }
+
+        $validator = [
+            'template'  => ['require', 'number'],
+            'file'      => ['require', 'file']
+        ];
+
+        $validate = Validate::make($validator);
+        if (!$validate->check(array_merge($request->only(array_keys($validator)), $request->file() ?? []))) {
+            return json(['status' => 'error', 'error' => $validate->getError()], 422);
+        }
+        $params = array_merge($request->only(array_keys($validator)), $request->file());
+        
+        $smsTemplate = SmsTemplateModel::get($params['template']);
+        if (!$smsTemplate) {
+            return json(['status' => 'error', 'error' => '短信模板不存在'], 400);
+        }
+
+        try {
+            $data = $this->parseTemplateFile($smsTemplate, $params['file']->getPathname());
+            
+            $resp = TencentSms::init(
+                    ConfigModel::where('k', 'sms_secret')->value('v'),
+                    ConfigModel::where('k', 'sms_key')->value('v'),
+                    ConfigModel::where('k', 'sms_appid')->value('v'),
+                    ConfigModel::where('k', 'sms_signname')->value('v')
+                );
+
+            foreach ($data as $row) {
+                $resp = $resp->add($row);
+            }
+            
+            $resp = $resp->send(true);
+
+            return json(['status' => 'success', 'data' => $resp])
+                ->options(['json_encode_param' => JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE]);
+        } catch (\Exception $e) {
+            return json(['status' => 'error', 'error' => $e->getMessage()], 400);
         }
     }
 

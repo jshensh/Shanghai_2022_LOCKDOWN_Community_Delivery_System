@@ -15,6 +15,15 @@ class Sms extends DashboardBase
         return $this->fetch();
     }
 
+    public function test2()
+    {
+        if (!$this->isAllowed('dashboard_sms_test')) {
+            $this->redirect("dashboard/AccessDenied/index");
+        }
+        $this->assign('smsSignName', ConfigModel::where('k', 'sms_signname')->value('v'));
+        return $this->fetch();
+    }
+
     public function template()
     {
         if (!$this->isAllowed('dashboard_sms_template')) {
